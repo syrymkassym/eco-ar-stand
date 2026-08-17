@@ -1,342 +1,41 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Экологическая безопасность — AR Stand</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Eco AR Stand</title>
 <style>
-:root{
-  --green:#39e56b; --green2:#0f6b38; --dark:#07120d; --panel:rgba(7,18,13,.86);
-  --line:rgba(91,235,126,.30); --text:#f1fff5; --muted:#b9cfc0;
-}
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#020705;color:var(--text);font-family:Inter,Arial,sans-serif}
-button{font:inherit}
-#camera{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;background:#020705;z-index:0;transform:scaleX(-1)}
-#shade{position:fixed;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.28),rgba(0,0,0,.18));z-index:1;pointer-events:none}
-#stage{position:fixed;inset:0;z-index:2;overflow:hidden;touch-action:none;cursor:grab}
-#stage.dragging{cursor:grabbing}
-#stand{
-  position:absolute;left:50%;top:50%;
-  width:min(920px,78vw);min-height:650px;
-  transform:translate(-50%,-50%) scale(1);
-  transform-origin:center center;
-  will-change:transform;
-  user-select:none;
-  filter:drop-shadow(0 25px 45px rgba(0,0,0,.55));
-}
-#stand.hidden{display:none}
-.board{
-  background:linear-gradient(145deg,rgba(248,255,249,.97),rgba(220,243,225,.94));
-  color:#102118;border:2px solid rgba(255,255,255,.8);border-radius:28px;
-  overflow:hidden;box-shadow:inset 0 0 0 7px rgba(39,160,83,.12);
-}
-.boardHead{padding:28px 34px 20px;background:linear-gradient(135deg,#f7fff8,#d9f2df);border-bottom:1px solid #a9d9b7}
-.kicker{font-size:12px;font-weight:800;letter-spacing:2px;color:#267542;text-transform:uppercase}
-h1{margin:5px 0 2px;font-size:clamp(30px,4vw,52px);line-height:1;font-weight:900}
-.sub{color:#47705a;font-size:15px}
-.progress{height:7px;background:#c5dfcc}.progress>i{display:block;height:100%;width:16.66%;background:linear-gradient(90deg,#1c8b49,#55df7c);transition:width .35s}
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:20px}
-.card{
-  min-height:210px;border-radius:20px;padding:18px;background:white;border:1px solid #cde4d3;
-  box-shadow:0 7px 18px rgba(28,91,49,.10);position:relative;overflow:hidden;
-  transition:.25s transform,.25s box-shadow,.25s border-color;
-}
-.card:hover{transform:translateY(-3px);box-shadow:0 12px 25px rgba(28,91,49,.16)}
-.card.active{border:2px solid #36b765;box-shadow:0 0 0 4px rgba(54,183,101,.13)}
-.num{font-size:12px;font-weight:900;color:#278c4c;letter-spacing:1px}
-.card h2{font-size:20px;line-height:1.05;margin:7px 0 12px}
-.card p{font-size:13px;line-height:1.45;color:#4d6555;margin:0 0 8px}
-.card ul{margin:7px 0 0;padding-left:18px;color:#40594a;font-size:12px;line-height:1.55}
-.icon{position:absolute;right:13px;top:13px;width:43px;height:43px;border-radius:13px;background:#e3f7e8;display:grid;place-items:center;font-size:23px}
-.boardFoot{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:#eef9f1;border-top:1px solid #c9e5d0;color:#41624d;font-size:12px}
-#intro{
-  position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(circle at 50% 40%,#123d24,#020705 65%);
-  padding:22px;
-}
-.introBox{width:min(520px,100%);padding:34px;border:1px solid var(--line);border-radius:28px;background:rgba(5,18,11,.9);text-align:center;box-shadow:0 20px 70px #000}
-.logo{font-size:48px}.introBox h2{font-size:34px;margin:14px 0 10px}.introBox p{color:var(--muted);line-height:1.65;margin:0 0 24px}
-.primary{border:0;border-radius:15px;padding:16px 24px;background:linear-gradient(135deg,#70f18b,#28ce62);color:#06130a;font-weight:900;cursor:pointer;min-width:230px}
-.primary:disabled{opacity:.65;cursor:wait}
-#topbar,#controls{position:fixed;z-index:5;display:flex;gap:8px;align-items:center}
-#topbar{left:16px;right:16px;top:14px;justify-content:space-between;pointer-events:none}
-#topbar>*{pointer-events:auto}
-.pill,.tool{
-  background:rgba(4,15,9,.72);backdrop-filter:blur(12px);border:1px solid var(--line);color:#ecfff1;
-  border-radius:12px;padding:10px 13px;box-shadow:0 8px 25px rgba(0,0,0,.18)
-}
-.pill strong{color:#6ef48a}.tool{cursor:pointer}.tool:hover{background:rgba(16,53,29,.9)}
-#controls{left:50%;bottom:18px;transform:translateX(-50%);flex-wrap:wrap;justify-content:center}
-#controls .tool{min-width:44px}
-#assistant{
- position:fixed;z-index:7;right:18px;bottom:18px;width:min(365px,calc(100vw - 36px));
- background:rgba(5,17,10,.90);backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:22px;
- box-shadow:0 18px 55px rgba(0,0,0,.45);overflow:hidden;display:none
-}
-#assistant.open{display:block}
-.assHead{padding:14px 15px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
-.assTitle{display:flex;gap:9px;align-items:center;font-weight:800}.dot{width:9px;height:9px;border-radius:50%;background:#58ef7a;box-shadow:0 0 12px #58ef7a}
-#messages{height:245px;overflow:auto;padding:13px}
-.msg{padding:10px 12px;border-radius:14px;margin-bottom:9px;line-height:1.4;font-size:13px;max-width:90%}
-.msg.ai{background:#12321e;color:#dfffe7}.msg.user{background:#245f39;margin-left:auto}
-.chatRow{display:flex;gap:7px;padding:10px;border-top:1px solid var(--line)}
-#chatInput{flex:1;min-width:0;background:#09170e;border:1px solid #245a35;color:white;border-radius:11px;padding:10px;outline:none}
-#send{border:0;background:#4be878;color:#07120b;border-radius:11px;padding:0 13px;font-weight:900;cursor:pointer}
-#hint{
- position:fixed;z-index:6;left:50%;top:74px;transform:translateX(-50%);padding:9px 13px;border-radius:12px;
- background:rgba(3,14,8,.65);backdrop-filter:blur(8px);color:#dfffe7;font-size:12px;border:1px solid rgba(91,235,126,.2);
- transition:opacity .4s
-}
-#toast{position:fixed;z-index:20;left:50%;bottom:90px;transform:translateX(-50%);padding:11px 15px;border-radius:12px;background:#101c14;border:1px solid var(--line);display:none}
-#sectionLabel{position:fixed;z-index:5;left:16px;bottom:18px;color:#d9ffe2;background:rgba(4,15,9,.62);padding:9px 12px;border-radius:11px;font-size:12px}
-@media(max-width:800px){
-  #stand{width:900px;min-height:620px}
-  .steps{grid-template-columns:repeat(3,1fr)}
-  .card{min-height:190px}
-  #controls{bottom:12px}
-  #assistant{bottom:70px}
-}
+*{box-sizing:border-box}html,body,#app{margin:0;width:100%;height:100%;overflow:hidden;background:#06100a;color:#eef8ef;font-family:Inter,Arial,sans-serif}#app{position:fixed;inset:0}#camera{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:radial-gradient(circle,#29452f,#06100a 72%);filter:brightness(.62) saturate(.8)}#scene{position:absolute;inset:0}#intro{position:absolute;inset:0;z-index:50;display:grid;place-items:center;padding:20px;background:#06100aeb}.card{width:min(460px,92vw);padding:32px 26px;border:1px solid #397c48;border-radius:28px;background:#071a0eec;text-align:center;box-shadow:0 30px 80px #0009}.logo{width:72px;height:72px;margin:auto auto 18px;border:1px solid #397c48;border-radius:20px;display:grid;place-items:center;font-size:38px;background:#0d2a15}h1{font-size:clamp(30px,7vw,48px);line-height:1.04;margin:0 0 15px}.card p{color:#b9cbbd;line-height:1.55;font-size:16px}.start{width:100%;padding:16px;border:0;border-radius:15px;background:linear-gradient(135deg,#79ed82,#37c86a);font-weight:800;font-size:17px;cursor:pointer}.status{min-height:20px;color:#ffb3a5;font-size:12px;margin-top:10px}#top{position:absolute;z-index:10;top:16px;left:16px;right:16px;display:flex;justify-content:space-between;pointer-events:none}.brand,#langs{pointer-events:auto;border:1px solid #397c48;background:#06150bd0;backdrop-filter:blur(12px);border-radius:14px;padding:9px 12px}.brand{font-weight:800}.lang{border:0;background:transparent;color:#dcefe0;padding:5px 8px;border-radius:8px;cursor:pointer}.lang.active{background:#2c7b45}#progress{position:absolute;z-index:9;top:75px;left:50%;transform:translateX(-50%);width:min(560px,72vw);display:flex;align-items:center}.dot{width:22px;height:22px;flex:none;border:1px solid #6dbd78;border-radius:50%;display:grid;place-items:center;background:#0b1d11;font-size:10px}.dot.active{background:#42a958;box-shadow:0 0 18px #42a95888}.line{height:2px;flex:1;background:#345f40}.line.done{background:#6ad578}#info{position:absolute;z-index:11;left:18px;top:115px;width:min(340px,34vw)}.info{padding:17px;border:1px solid #4d9958;border-radius:20px;background:#06160bd0;backdrop-filter:blur(13px)}.num{font-size:11px;color:#75d17e;font-weight:800;letter-spacing:.12em}.title{font-size:22px;font-weight:850;margin:6px 0}.sub{font-size:13px;line-height:1.45;color:#bed1c2}#hint{position:absolute;z-index:12;bottom:18px;left:50%;transform:translateX(-50%);padding:10px 14px;border:1px solid #397c48;border-radius:13px;background:#06150bd9;color:#d6e8d9;font-size:12px;pointer-events:none}#aiFab{position:absolute;z-index:25;right:18px;bottom:18px;width:58px;height:58px;border:1px solid #63bd6e;border-radius:50%;background:#071c0edb;color:#e6ffe9;font-size:24px;cursor:pointer;box-shadow:0 10px 30px #0008}#ai{position:absolute;z-index:30;right:18px;bottom:88px;width:min(370px,calc(100vw - 28px));max-height:70vh;display:none;flex-direction:column;border:1px solid #397c48;border-radius:20px;background:#06160bf2;backdrop-filter:blur(16px);overflow:hidden}.head{padding:14px 16px;border-bottom:1px solid #ffffff12;display:flex;justify-content:space-between}.head span{font-size:12px;color:#7dd489}.chat{padding:13px;overflow:auto;display:flex;flex-direction:column;gap:9px}.msg{max-width:92%;padding:10px 12px;border-radius:13px;font-size:13px;line-height:1.45}.aiMsg{align-self:flex-start;background:#10291a;border:1px solid #285d38}.userMsg{align-self:flex-end;background:#286e3e}.controls{display:flex;gap:6px;padding:9px;border-top:1px solid #ffffff12}.controls input{min-width:0;flex:1;background:#08150c;color:#fff;border:1px solid #315c3c;border-radius:10px;padding:9px}.controls button{border:1px solid #458e51;background:#10301a;color:#eaffed;border-radius:10px;padding:8px 10px;cursor:pointer}
+@media(max-width:700px){#top{top:9px;left:9px;right:9px}.brand{font-size:11px;padding:8px 9px}#progress{top:57px;width:84vw}#info{left:9px;top:auto;bottom:82px;width:min(285px,68vw)}.info{padding:13px;border-radius:16px}.title{font-size:17px}.sub{font-size:11px}#hint{bottom:10px;max-width:88vw;text-align:center;font-size:10px}#aiFab{right:11px;bottom:11px}#ai{right:10px;bottom:78px;width:calc(100vw - 20px)}}
 </style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 </head>
-<body>
-<video id="camera" autoplay playsinline muted></video>
-<div id="shade"></div>
-
-<div id="intro">
-  <div class="introBox">
-    <div class="logo">♻️</div>
-    <div class="kicker">Interactive AR / presentation</div>
-    <h2>Экологическая<br>безопасность</h2>
-    <p>Разрешите камеру, чтобы открыть интерактивный стенд поверх окружающего пространства. Стенд можно свободно двигать, масштабировать и скрывать.</p>
-    <button id="startBtn" class="primary">Разрешить камеру и начать</button>
-    <div id="camStatus" style="margin-top:12px;font-size:12px;color:#9fb8a7"></div>
-  </div>
-</div>
-
-<div id="topbar">
-  <div class="pill"><strong>AR STAND</strong> · Экологическая безопасность</div>
-  <div style="display:flex;gap:8px">
-    <button class="tool" id="cameraBtn">Камера</button>
-    <button class="tool" id="hideBtn">Скрыть стенд</button>
-    <button class="tool" id="assistantBtn">ИИ-помощник</button>
-  </div>
-</div>
-
-<div id="hint">Перетаскивайте стенд мышью · колесо — масштаб · Shift+перетаскивание — свободное перемещение</div>
-
-<div id="stage">
-  <div id="stand">
-    <div class="board">
-      <div class="boardHead">
-        <div class="kicker">Интерактивная экологическая экспозиция</div>
-        <h1>ЭКОЛОГИЧЕСКАЯ БЕЗОПАСНОСТЬ</h1>
-        <div class="sub">Ключевые действия: от угрозы к решению</div>
-      </div>
-      <div class="progress"><i id="progress"></i></div>
-      <div class="steps" id="cards"></div>
-      <div class="boardFoot">
-        <span>6 тем · RU / KZ · интерактивная презентация</span>
-        <span id="stepText">1 / 6</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="sectionLabel">Сейчас: <b>1. Основные экологические угрозы</b></div>
-
-<div id="controls">
-  <button class="tool" id="prev">←</button>
-  <button class="tool" id="next">→</button>
-  <button class="tool" id="zoomOut">−</button>
-  <button class="tool" id="zoomReset">100%</button>
-  <button class="tool" id="zoomIn">+</button>
-  <button class="tool" id="center">Центр</button>
-  <button class="tool" id="show">Показать стенд</button>
-</div>
-
-<div id="assistant">
-  <div class="assHead">
-    <div class="assTitle"><span class="dot"></span> ИИ-гид</div>
-    <div>
-      <button class="tool" id="speakToggle" style="padding:6px 9px">🔊</button>
-      <button class="tool" id="closeAssistant" style="padding:6px 9px">×</button>
-    </div>
-  </div>
-  <div id="messages"></div>
-  <div class="chatRow">
-    <input id="chatInput" placeholder="Спросите про стенд...">
-    <button id="send">➤</button>
-  </div>
-</div>
-<div id="toast"></div>
-
-<script>
-(function(){
-"use strict";
-
-const sections = [
- {title:"Основные экологические угрозы",kz:"Негізгі экологиялық қауіп-қатерлер",icon:"🌍",
-  items:["Загрязнение воздуха, воды и почвы.","Неправильное обращение с отходами.","Истощение природных ресурсов."]},
- {title:"Экологическая безопасность в Казахстане",kz:"Қазақстан Республикасындағы экологиялық қауіпсіздік",icon:"🇰🇿",
-  items:["Соблюдение требований экологического законодательства.","Рациональное использование природных ресурсов.","Предотвращение загрязнения окружающей среды."]},
- {title:"Правильная сортировка отходов",kz:"Қалдықтарды дұрыс сұрыптау",icon:"♻️",
-  items:["Reduce — сокращение образования отходов.","Reuse — повторное использование.","Recycle — переработка отходов."]},
- {title:"Что может сделать каждый",kz:"Әркім не істей алады",icon:"🌱",
-  items:["Сортировать отходы.","Экономить воду и электроэнергию.","Не загрязнять окружающую среду.","Участвовать в озеленении и посадке деревьев."]},
- {title:"Утилизация отходов",kz:"Қалдықтарды кәдеге жарату",icon:"🗑️",
-  items:["Передавать отходы на переработку.","Опасные отходы сдавать в специализированные пункты.","Соблюдать правила раздельного сбора отходов."]},
- {title:"Участие в природоохранных мероприятиях",kz:"Табиғатты қорғау іс-шараларына қатысу",icon:"🌳",
-  items:["Участвовать в экологических акциях и субботниках.","Поддерживать чистоту окружающей среды.","Бережно относиться к природе."]}
-];
-
-const camera=document.getElementById("camera");
-const intro=document.getElementById("intro");
-const startBtn=document.getElementById("startBtn");
-const camStatus=document.getElementById("camStatus");
-const stand=document.getElementById("stand");
-const stage=document.getElementById("stage");
-const cards=document.getElementById("cards");
-const progress=document.getElementById("progress");
-const stepText=document.getElementById("stepText");
-const sectionLabel=document.getElementById("sectionLabel");
-const toast=document.getElementById("toast");
-let stream=null, section=0, scale=1, x=0, y=0, dragging=false, lastX=0,lastY=0, shiftDrag=false;
-let speaking=true, firstAssistantDone=false;
-
-function render(){
-  cards.innerHTML=sections.map((s,i)=>`
-    <article class="card ${i===section?"active":""}" data-index="${i}">
-      <div class="icon">${s.icon}</div>
-      <div class="num">${i+1} / 6</div>
-      <h2>${s.title}</h2>
-      <p><b>${s.kz}</b></p>
-      <ul>${s.items.map(v=>`<li>${v}</li>`).join("")}</ul>
-    </article>`).join("");
-  progress.style.width=((section+1)/sections.length*100)+"%";
-  stepText.textContent=(section+1)+" / 6";
-  sectionLabel.innerHTML="Сейчас: <b>"+(section+1)+". "+sections[section].title+"</b>";
-}
-function applyTransform(){
-  stand.style.transform=`translate(calc(-50% + ${x}px),calc(-50% + ${y}px)) scale(${scale})`;
-}
-function setSection(n){
-  section=(n+sections.length)%sections.length; render();
-  if(firstAssistantDone) assistantExplain(section);
-}
-function showToast(t){
-  toast.textContent=t; toast.style.display="block";
-  clearTimeout(showToast.t); showToast.t=setTimeout(()=>toast.style.display="none",1800);
-}
-
-async function startCamera(){
-  startBtn.disabled=true; startBtn.textContent="Запускаем…"; camStatus.textContent="";
-  try{
-    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error("Браузер не поддерживает доступ к камере");
-    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"},audio:false});
-    camera.srcObject=stream; await camera.play();
-    intro.style.display="none";
-    showToast("Камера включена");
-    setTimeout(()=>document.getElementById("hint").style.opacity=".35",4500);
-    firstAssistantDone=true;
-    openAssistant();
-    assistantExplain(0,true);
-  }catch(e){
-    startBtn.disabled=false; startBtn.textContent="Разрешить камеру и начать";
-    camStatus.textContent="Не удалось включить камеру: "+e.message;
-    showToast("Проверьте разрешение камеры для localhost");
-  }
-}
-startBtn.addEventListener("click",startCamera);
-
-document.getElementById("cameraBtn").onclick=async()=>{
-  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;camera.srcObject=null;showToast("Камера выключена");return}
-  try{
-    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"},audio:false});
-    camera.srcObject=stream;await camera.play();showToast("Камера включена");
-  }catch(e){showToast("Нет доступа к камере");}
-};
-
-function openAssistant(){document.getElementById("assistant").classList.add("open")}
-document.getElementById("assistantBtn").onclick=openAssistant;
-document.getElementById("closeAssistant").onclick=()=>document.getElementById("assistant").classList.remove("open");
-
-function addMsg(text,type="ai"){
-  const box=document.getElementById("messages"), div=document.createElement("div");
-  div.className="msg "+type;div.textContent=text;box.appendChild(div);box.scrollTop=box.scrollHeight;
-}
-function speak(text){
-  if(!speaking || !("speechSynthesis" in window)) return;
-  speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text);u.lang="ru-RU";u.rate=.96;u.pitch=1;
-  speechSynthesis.speak(u);
-}
-function assistantExplain(i,first=false){
-  const s=sections[i];
-  const text=first
-    ?"Здравствуйте! Я ваш ИИ-гид. Перед вами интерактивный стенд по экологической безопасности. Сейчас я кратко проведу вас по всем шести темам. После этого вы сами решаете, когда обращаться ко мне. Стенд можно двигать, масштабировать и скрывать."
-    :`Раздел ${i+1}: ${s.title}. ${s.items.join(" ")} Коротко: это ${i===0?"главные экологические угрозы":i===1?"основа экологической безопасности в Казахстане":i===2?"принцип Reduce, Reuse, Recycle":i===3?"простые действия каждого человека":i===4?"правильная передача отходов на переработку":"участие в защите природы"}.`;
-  addMsg(text);speak(text);
-}
-document.getElementById("speakToggle").onclick=()=>{speaking=!speaking;document.getElementById("speakToggle").textContent=speaking?"🔊":"🔇";if(!speaking)speechSynthesis.cancel()};
-
-function answer(q){
-  const s=q.toLowerCase();
-  if(s.includes("привет")||s.includes("здрав")) return "Здравствуйте! Я помогу разобраться со стендом. Можете спросить про любую из шести тем.";
-  if(s.includes("камера")) return "Камера используется только как визуальный фон. Стенд работает поверх изображения, а видео не отправляется на сервер.";
-  if(s.includes("двиг")||s.includes("перемест")) return "Зажмите левую кнопку мыши и перетаскивайте стенд. Колесо меняет масштаб. Кнопка «Центр» возвращает его в исходное положение.";
-  if(s.includes("скры")||s.includes("убр")) return "Нажмите «Скрыть стенд». Камера останется включенной, а стенд можно вернуть кнопкой «Показать стенд».";
-  for(let i=0;i<sections.length;i++){
-    const keys=[String(i+1),sections[i].title.toLowerCase(),sections[i].kz.toLowerCase()];
-    if(keys.some(k=>s.includes(k))) return sections[i].items.join(" ")+` Это раздел ${i+1}: ${sections[i].title}.`;
-  }
-  if(s.includes("reduce")||s.includes("reuse")||s.includes("recycle")) return sections[2].items.join(" ");
-  return "Попробуйте спросить: «Что такое экологические угрозы?», «Как сортировать отходы?», «Что может сделать каждый?» или «Как двигать стенд?»";
-}
-function send(){
-  const input=document.getElementById("chatInput"),q=input.value.trim();if(!q)return;
-  addMsg(q,"user");input.value="";const a=answer(q);setTimeout(()=>{addMsg(a);speak(a)},180);
-}
-document.getElementById("send").onclick=send;
-document.getElementById("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter")send()});
-
-stage.addEventListener("pointerdown",e=>{
-  if(e.button!==0)return;
-  dragging=true;shiftDrag=e.shiftKey;lastX=e.clientX;lastY=e.clientY;stage.classList.add("dragging");stage.setPointerCapture(e.pointerId);
-});
-stage.addEventListener("pointermove",e=>{
-  if(!dragging)return;
-  const dx=e.clientX-lastX,dy=e.clientY-lastY;lastX=e.clientX;lastY=e.clientY;
-  // обычное перетаскивание и Shift+перетаскивание обеим способом перемещают стенд;
-  // Shift оставлен как подсказка для режима свободного позиционирования.
-  x+=dx;y+=dy;applyTransform();
-});
-stage.addEventListener("pointerup",()=>{dragging=false;stage.classList.remove("dragging")});
-stage.addEventListener("pointercancel",()=>{dragging=false;stage.classList.remove("dragging")});
-stage.addEventListener("wheel",e=>{
-  e.preventDefault();scale=Math.max(.35,Math.min(2.2,scale*(e.deltaY<0?1.08:.925)));applyTransform();
-},{passive:false});
-
-document.getElementById("zoomIn").onclick=()=>{scale=Math.min(2.2,scale*1.15);applyTransform()};
-document.getElementById("zoomOut").onclick=()=>{scale=Math.max(.35,scale*.87);applyTransform()};
-document.getElementById("zoomReset").onclick=()=>{scale=1;applyTransform()};
-document.getElementById("center").onclick=()=>{x=0;y=0;scale=1;applyTransform();showToast("Стенд возвращён в центр")};
-document.getElementById("hideBtn").onclick=()=>{stand.classList.add("hidden");showToast("Стенд скрыт")};
-document.getElementById("show").onclick=()=>{stand.classList.remove("hidden");showToast("Стенд показан")};
-document.getElementById("prev").onclick=()=>setSection(section-1);
-document.getElementById("next").onclick=()=>setSection(section+1);
-
-cards.addEventListener("click",e=>{
-  const c=e.target.closest(".card");if(!c)return;setSection(Number(c.dataset.index));
-});
-
-document.addEventListener("keydown",e=>{
-  if(e.key==="ArrowRight")setSection(section+1);
-  if(e.key==="ArrowLeft")setSection(section-1);
-  if(e.key==="Escape")document.getElementById("assistant").classList.remove("open");
-});
-render();applyTransform();
-})();
-</script>
-</body>
-</html>
+<body><div id="app"><video id="camera" autoplay playsinline muted></video><div id="scene"></div>
+<div id="intro"><div class="card"><div class="logo">♻</div><h1>Экологическая<br>безопасность</h1><p>Интерактивный AR-стенд: изучайте экологический путь, перемещайте его по пространству и приближайте жестами.</p><button class="start" id="start">Разрешить камеру и начать</button><div class="status" id="status"></div></div></div>
+<div id="top"><div class="brand">ЭКО · AR STAND</div><div id="langs"><button class="lang active" data-l="ru">RU</button><button class="lang" data-l="kz">KZ</button></div></div><div id="progress"></div><div id="info"><div class="info"><div class="num" id="num"></div><div class="title" id="title"></div><div class="sub" id="sub"></div></div></div><div id="hint">☝ Один палец — перемещение · 🤏 Два пальца — масштаб</div>
+<button id="aiFab">✦</button><div id="ai"><div class="head"><b>✦ AI-гид</b><span>помощник</span></div><div class="chat" id="chat"></div><div class="controls"><input id="input" placeholder="Спросите о стенде..."><button id="speak">🔊</button><button id="send">➤</button></div></div></div>
+<script type="module">
+import * as THREE from 'three';import{OrbitControls}from'three/addons/controls/OrbitControls.js';
+const S=[
+['Основные экологические угрозы','Негізгі экологиялық қауіп-қатерлер','Загрязнение воздуха, воды и почвы. Неправильное обращение с отходами. Истощение природных ресурсов.','Ауа, су және топырақтың ластануы. Қалдықтармен дұрыс жұмыс істемеу. Табиғи ресурстардың сарқылуы.','⚠'],
+['Экологическая безопасность в Казахстане','Қазақстан Республикасындағы экологиялық қауіпсіздік','Соблюдение требований экологического законодательства. Рациональное использование природных ресурсов. Предотвращение загрязнения окружающей среды.','Экологиялық заңнама талаптарын сақтау. Табиғи ресурстарды ұтымды пайдалану. Қоршаған ортаның ластануына жол бермеу.','KZ'],
+['Правильная сортировка отходов','Қалдықтарды дұрыс сұрыптау','Reduce — сокращение образования отходов. Reuse — повторное использование. Recycle — переработка отходов.','Reduce — қалдықтардың түзілуін азайту. Reuse — қайта пайдалану. Recycle — қалдықтарды қайта өңдеу.','♻'],
+['Что может сделать каждый','Әркім не істей алады','Сортировать отходы. Экономить воду и электроэнергию. Не загрязнять окружающую среду. Участвовать в озеленении и посадке деревьев.','Қалдықтарды сұрыптау. Су мен электр энергиясын үнемдеу. Қоршаған ортаны ластамау. Ағаш отырғызуға және көгалдандыруға қатысу.','🌱'],
+['Утилизация отходов','Қалдықтарды кәдеге жарату','Передавать отходы на переработку. Опасные отходы сдавать в специализированные пункты. Соблюдать правила раздельного сбора отходов.','Қалдықтарды қайта өңдеуге тапсыру. Қауіпті қалдықтарды мамандандырылған қабылдау орындарына өткізу. Қалдықтарды бөлек жинау қағидаларын сақтау.','♻'],
+['Участие в природоохранных мероприятиях','Табиғатты қорғау іс-шараларына қатысу','Участвовать в экологических акциях и субботниках. Поддерживать чистоту окружающей среды. Бережно относиться к природе.','Экологиялық акциялар мен сенбіліктерге қатысу. Қоршаған ортаның тазалығын сақтау. Табиғатқа ұқыпты қарау.','🌍']];
+let lang='ru',cur=0;const video=document.getElementById('camera'),sceneEl=document.getElementById('scene');
+const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,100);cam.position.set(0,0,13);
+const renderer=new THREE.WebGLRenderer({alpha:true,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);sceneEl.appendChild(renderer.domElement);
+scene.add(new THREE.AmbientLight(0xffffff,1.8));let dl=new THREE.DirectionalLight(0xffffff,2.4);dl.position.set(4,6,8);scene.add(dl);let glow=new THREE.PointLight(0x5de174,10,30);glow.position.set(-4,2,5);scene.add(glow);
+const stand=new THREE.Group();scene.add(stand);const board=new THREE.Mesh(new THREE.BoxGeometry(10.5,7.1,.18),new THREE.MeshStandardMaterial({color:0xf1f5ed,roughness:.75}));stand.add(board);
+function texture(){let c=document.createElement('canvas');c.width=1200;c.height=810;let x=c.getContext('2d');x.fillStyle='#f2f6ef';x.fillRect(0,0,1200,810);x.textAlign='center';x.fillStyle='#1f713d';x.font='800 50px Arial';x.fillText(lang==='ru'?'ЭКОЛОГИЧЕСКАЯ БЕЗОПАСНОСТЬ':'ЭКОЛОГИЯЛЫҚ ҚАУІПСІЗДІК',600,65);x.font='22px Arial';x.fillStyle='#52745b';x.fillText('ИНТЕРАКТИВНЫЙ ПУТЬ · 1 → 2 → 3 → 4 → 5 → 6',600,100);let p=[[45,135],[430,135],[815,135],[45,445],[430,445],[815,445]];S.forEach((s,i)=>{let[a,b]=p[i];x.fillStyle='#fff';x.strokeStyle='#65a66e';x.lineWidth=4;x.shadowColor='#0002';x.shadowBlur=14;x.fillRect(a,b,340,235);x.shadowBlur=0;x.strokeRect(a,b,340,235);x.fillStyle='#237641';x.beginPath();x.arc(a+38,b+38,24,0,7);x.fill();x.fillStyle='#fff';x.font='bold 21px Arial';x.fillText(i+1,a+38,b+46);x.textAlign='left';x.fillStyle='#1e4228';x.font='bold 21px Arial';let words=(lang==='ru'?s[0]:s[1]).split(' '),line='',yy=b+78;for(let w of words){if((line+w).length>24){x.fillText(line,a+18,yy);yy+=27;line=''}line+=w+' '}x.fillText(line,a+18,yy);x.fillStyle='#58705d';x.font='17px Arial';let arr=(lang==='ru'?s[2]:s[3]).split('. ');arr.slice(0,3).forEach((v,j)=>x.fillText('• '+v,a+18,b+145+j*27));x.textAlign='center'});return new THREE.CanvasTexture(c)}board.material.map=texture();board.material.needsUpdate=true;
+const pos=[[-4,2.05,.25],[-.85,2.05,.25],[2.3,2.05,.25],[-4,-1.05,.25],[-.85,-1.05,.25],[2.3,-1.05,.25]],nodes=[];S.forEach((s,i)=>{let g=new THREE.Group();g.position.set(...pos[i]);let m=new THREE.Mesh(new THREE.CylinderGeometry(.34,.34,.12,40),new THREE.MeshStandardMaterial({color:[0xd3a92c,0x4d9d5b,0x3b9d8b,0x70b94e,0x4d8fb1,0x5daa54][i],emissive:[0xd3a92c,0x4d9d5b,0x3b9d8b,0x70b94e,0x4d8fb1,0x5daa54][i],emissiveIntensity:.1}));m.rotation.x=Math.PI/2;g.add(m);g.add(new THREE.Mesh(new THREE.TorusGeometry(.43,.025,10,40),new THREE.MeshBasicMaterial({color:m.material.color})));stand.add(g);nodes.push(g)});
+const controls=new OrbitControls(cam,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.08;controls.enableRotate=false;controls.enablePan=true;controls.screenSpacePanning=true;controls.minDistance=6;controls.maxDistance=25;controls.mouseButtons.LEFT=THREE.MOUSE.PAN;controls.mouseButtons.RIGHT=THREE.MOUSE.PAN;controls.touches.ONE=THREE.TOUCH.PAN;controls.touches.TWO=THREE.TOUCH.DOLLY_PAN;
+function ui(){let s=S[cur];document.getElementById('num').textContent='0'+(cur+1)+' / 06';document.getElementById('title').textContent=lang==='ru'?s[0]:s[1];document.getElementById('sub').textContent=lang==='ru'?s[2]:s[3];nodes.forEach((n,i)=>n.scale.setScalar(i===cur?1.25:1));let p=document.getElementById('progress');p.innerHTML='';for(let i=0;i<6;i++){let d=document.createElement('div');d.className='dot '+(i===cur?'active':'');d.textContent=i+1;p.appendChild(d);if(i<5){let l=document.createElement('div');l.className='line '+(i<cur?'done':'');p.appendChild(l)}}document.querySelectorAll('.lang').forEach(b=>b.classList.toggle('active',b.dataset.l===lang));}
+function speak(t){if(!speechSynthesis)return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang=lang==='ru'?'ru-RU':'kk-KZ';u.rate=.96;speechSynthesis.speak(u)}function msg(t,user=false){let d=document.createElement('div');d.className='msg '+(user?'userMsg':'aiMsg');d.textContent=t;document.getElementById('chat').appendChild(d);document.getElementById('chat').scrollTop=1e6}
+function introAI(){let t=lang==='ru'?'Здравствуйте! Я ваш экологический AI-гид. Перед вами шесть связанных разделов: угрозы, безопасность в Казахстане, сортировка, личные действия, утилизация и участие. Стенд можно перемещать мышью или пальцем, а двумя пальцами — приближать и отдалять. Если хотите подробнее — откройте меня в любой момент.':'Сәлеметсіз бе! Мен сіздің экологиялық AI-гидіңізбін. Алты бөлім арқылы экологиялық қауіптерден табиғатты қорғауға дейін танысамыз. Стендті тышқанмен немесе саусақпен жылжытып, екі саусақпен жақындатуға болады. Қосымша ақпарат керек болса, мен көмектесемін.';msg(t);setTimeout(()=>speak(t),400)}
+document.getElementById('start').onclick=async()=>{try{let st=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});video.srcObject=st;await video.play();document.getElementById('intro').style.display='none';introAI()}catch(e){document.getElementById('status').textContent='Камера не запустилась: '+e.message}};
+document.querySelectorAll('.lang').forEach(b=>b.onclick=()=>{lang=b.dataset.l;board.material.map=texture();board.material.needsUpdate=true;ui()});document.getElementById('aiFab').onclick=()=>{let a=document.getElementById('ai');a.style.display=a.style.display==='flex'?'none':'flex'};
+document.getElementById('send').onclick=()=>{let i=document.getElementById('input'),q=i.value.trim();if(!q)return;msg(q,true);i.value='';let n=(q.match(/[1-6]/)||[])[0];let t=n? (lang==='ru'?S[n-1][2]:S[n-1][3]):(lang==='ru'?`Сейчас открыт раздел ${cur+1}: ${S[cur][0]}. Напишите номер 1–6, и я объясню его.`:`Қазір ${cur+1}-бөлім ашық. 1–6 нөмірін жазсаңыз, түсіндіремін.`);if(n){cur=+n-1;ui()}setTimeout(()=>{msg(t);speak(t)},180)};document.getElementById('input').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('send').click()});document.getElementById('speak').onclick=()=>speak(lang==='ru'?S[cur][2]:S[cur][3]);
+let ray=new THREE.Raycaster(),pt=new THREE.Vector2(),sx=0,sy=0;renderer.domElement.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY});renderer.domElement.addEventListener('pointerup',e=>{if(Math.hypot(e.clientX-sx,e.clientY-sy)>8)return;pt.x=e.clientX/innerWidth*2-1;pt.y=-(e.clientY/innerHeight)*2+1;ray.setFromCamera(pt,cam);let h=ray.intersectObjects(nodes,true)[0];if(h){let n=nodes.indexOf(h.object.parent);if(n>=0){cur=n;ui()}}});
+addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});ui();function loop(){requestAnimationFrame(loop);controls.update();nodes.forEach((n,i)=>n.rotation.z+=i===cur?.003:.001);renderer.render(scene,cam)}loop();
+</script></body></html>
